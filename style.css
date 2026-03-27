@@ -1,0 +1,40 @@
+/* input đẹp */
+#inputWrapper {
+  font-size: 28px;
+  padding: 15px;
+  width: 100%;
+  background: #111;
+  color: #00eaff;
+  border: 2px solid #00eaff;
+  border-radius: 10px;
+  margin-bottom: 15px;
+  min-height: 50px;
+}
+
+/* cursor nhấp nháy */
+.cursor {
+  display: inline-block;
+  width: 2px;
+  height: 28px;
+  background: #00eaff;
+  margin-left: 3px;
+  animation: blink 1s infinite;
+}
+
+@keyframes blink {
+  0%, 50%, 100% { opacity: 1; }
+  25%, 75% { opacity: 0; }
+}
+
+/* màu đẹp hơn */
+#messagesBox div {
+  border: 2px solid #00eaff;
+  background: #0a0f1a;
+  color: #e6faff;
+}
+
+button {
+  background: #00eaff;
+  color: black;
+  font-weight: bold;
+}

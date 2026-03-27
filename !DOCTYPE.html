@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Test Firebase</title>
+</head>
+<body>
+
+  <input id="input" placeholder="nhập text...">
+  <button id="send">Gửi</button>
+
+  <pre id="log"></pre>
+
+<script type="module">
+  import { initializeApp } 
+    from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+  import { getDatabase, ref, push, get, onValue } 
+    from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyCvyh8yS_MifKn8DwDKI2t0Ymbiq1Hj4hM",
+    authDomain: "asl-inot.firebaseapp.com",
+    databaseURL: "https://asl-inot-default-rtdb.firebaseio.com",
+    projectId: "asl-inot",
+    storageBucket: "asl-inot.firebasestorage.app",
+    messagingSenderId: "62034679084",
+    appId: "1:62034679084:web:2fb8a5601b8d7debbf4889",
+    measurementId: "G-PCBRPZ79ND"
+  };
+
+  const app = initializeApp(firebaseConfig);
+  const db = getDatabase(app);
+
+  document.getElementById("send").onclick = async () => {
+    const text = document.getElementById("input").value;
+    await push(ref(db, "test_messages"), {
+      text: text,
+      time: new Date().toISOString()
+    });
+  };
+
+  onValue(ref(db, "test_messages"), snap => {
+    document.getElementById("log").innerText =
+      JSON.stringify(snap.val(), null, 2);
+  });
+</script>
+
+</body>
+</html>

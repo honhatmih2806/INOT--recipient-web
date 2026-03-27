@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <title>ASL App</title>
+
+  <style>
+    body {
+      background: black;
+      color: white;
+      font-size: 18px;
+      font-family: Arial;
+    }
+
+    h2 {
+      color: #00eaff;
+    }
+
+    #inputWrapper {
+      position: relative;
+      margin-bottom: 15px;
+    }
+
+    #msgInput {
+      width: 100%;
+      padding: 15px;
+      font-size: 26px;
+      background: #111;
+      color: #00eaff;
+      border: 2px solid #00eaff;
+      border-radius: 10px;
+      outline: none;
+    }
+
+    .cursor {
+      position: absolute;
+      right: 10px;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 2px;
+      height: 25px;
+      background: #00eaff;
+      animation: blink 1s infinite;
+    }
+
+    @keyframes blink {
+      0%,100% {opacity:1;}
+      50% {opacity:0;}
+    }
+
+    #messagesBox div {
+      border: 2px solid #00eaff;
+      padding: 12px;
+      margin: 12px;
+      background: #0a0f1a;
+      border-radius: 10px;
+      color: #e6faff;
+    }
+
+    button {
+      background: #00eaff;
+      color: black;
+      border: none;
+      padding: 6px 12px;
+      cursor: pointer;
+      font-weight: bold;
+      margin-right: 5px;
+    }
+
+    #status {
+      color: #00ff99;
+      font-weight: bold;
+    }
+  </style>
+</head>
+
+<body>
+
+<h2>ASL Firebase Demo</h2>
+
+<div id="inputWrapper">
+  <span class="cursor"></span>
+</div>
+<button id="deleteOldestBtn">🧹 Xóa tin cũ nhất</button>
+
+<h3>Trạng thái: <span id="status"></span></h3>
+
+<h3>Tin nhắn:</h3>
+<div id="messagesBox"></div>
+
+<script type="module">
+import { 
+  saveASLMessage, 
+  listenMessages, 
+  listenConnectionStatus,
+  deleteOldestMessage,
+  deleteMessageById
+} from "./app.js";
+
+const input = document.getElementById("msgInput");
+
+// xóa tin cũ nhất
+document.getElementById("deleteOldestBtn").onclick = () => {
+  deleteOldestMessage();
+};
+
+// trạng thái
+listenConnectionStatus((st) => {
+  document.getElementById("status").innerText = st;
+});
+
+// hiển thị tin nhắn
+listenMessages((data) => {
+  const box = document.getElementById("messagesBox");
+  box.innerHTML = "";
+
+  if (!data) return;
+
+  Object.entries(data)
+    .sort((a, b) => new Date(a[1].timestamp) - new Date(b[1].timestamp))
+    .forEach(([id, msg]) => {
+
+      const div = document.createElement("div");
+
+      const content = document.createElement("p");
+      content.innerHTML = `<b>Nội dung:</b> ${msg.text}`;
+
+      const time = document.createElement("p");
+      time.innerHTML = `<b>Thời gian:</b> ${formatDateVN(msg.timestamp)}`;
+
+      const btnCopy = document.createElement("button");
+      btnCopy.innerText = "Copy";
+      btnCopy.onclick = () => copyText(msg.text);
+
+      const btnSpeak = document.createElement("button");
+      btnSpeak.innerText = "🔊";
+      btnSpeak.onclick = () => speak(msg.text);
+
+      const btnDelete = document.createElement("button");
+      btnDelete.innerText = "❌";
+      btnDelete.onclick = () => deleteMsg(id);
+
+      div.append(content, time, btnCopy, btnSpeak, btnDelete);
+
+      box.appendChild(div);
+      box.scrollTop = box.scrollHeight;
+    });
+});
+
+// copy
+window.copyText = (text) => {
+  navigator.clipboard.writeText(text);
+};
+
+// voice
+let voices = [];
+speechSynthesis.onvoiceschanged = () => {
+  voices = speechSynthesis.getVoices();
+};
+
+window.speak = (text) => {
+  const utter = new SpeechSynthesisUtterance(text);
+
+  const femaleVoice = voices.find(v =>
+    v.lang.includes("vi")
+  ) || voices[0];
+
+  if (femaleVoice) utter.voice = femaleVoice;
+
+  utter.lang = femaleVoice?.lang || "vi-VN";
+  utter.rate = 0.95;
+  utter.pitch = 1.2;
+
+  speechSynthesis.cancel();
+  speechSynthesis.speak(utter);
+};
+
+// format ngày
+function formatDateVN(isoString) {
+  const date = new Date(isoString);
+
+  return date.toLocaleString("vi-VN", {
+    day: "2-digit",
+    month: "2-digit",
+    year: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+    second: "2-digit"
+  });
+}
+
+// xóa từng tin
+window.deleteMsg = (id) => {
+  if (confirm("Xóa tin nhắn này?")) {
+    deleteMessageById(id);
+  }
+};
+</script>
+
+</body>
+</html>

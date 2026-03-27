@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>ASL Firebase Test</title>
+</head>
+<body>
+
+  <h2>ASL Firebase Demo</h2>
+
+  <input id="msgInput" placeholder="Nhập chuỗi ASL..." />
+
+
+  <h3>Trạng thái kết nối: <span id="status"></span></h3>
+
+  <h3>Danh sách tin nhắn:</h3>
+  <pre id="messagesBox"></pre>
+
+  <script type="module">
+    import { saveASLMessage, listenMessages, listenConnectionStatus } from "./app.js";
+
+    // Gửi tin nhắn
+    document.getElementById("sendBtn").onclick = () => {
+      const text = document.getElementById("msgInput").value;
+      saveASLMessage(text);
+    };
+
+    // Cập nhật trạng thái kết nối
+    listenConnectionStatus((st) => {
+      document.getElementById("status").innerText = st;
+    });
+
+    // Hiện realtime tin nhắn
+    listenMessages((data) => {
+      document.getElementById("messagesBox").innerText = JSON.stringify(data, null, 2);
+    });
+  </script>
+</body>
+</html>
